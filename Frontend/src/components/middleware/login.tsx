@@ -1,5 +1,6 @@
 "use client"
 
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import {z} from "zod"
@@ -76,6 +77,7 @@ export function LoginForm(){
                     </FormItem>
                   )}
                 />
+
 <FormField
   control={form.control}
   name="password"
@@ -92,6 +94,16 @@ export function LoginForm(){
     </FormItem>
   )}
 />
+<GoogleOAuthProvider clientId="process.env.clientId">
+  <GoogleLogin
+    onSuccess={credentialResponse => {
+      console.log(credentialResponse);
+    }}
+    onError={() => {
+      console.log('Login Failed');
+    }}
+  />
+</GoogleOAuthProvider>
 
                 <Button type="submit">Submit</Button>
               </form>
