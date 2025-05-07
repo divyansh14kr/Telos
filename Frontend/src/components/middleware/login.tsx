@@ -1,5 +1,6 @@
-"use client"
 
+
+import { createClient } from '@supabase/supabase-js'
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -19,7 +20,11 @@ import {useState} from 'react'
 import { useCookies } from 'react-cookie'
 
 
+
+
+
 const formSchema = z.object({
+
     username : z.string().min(4).max(13),
     password : z.string({required_error: "Required"})
     .min(8, {message: 'Minimum 8 letters required'})
@@ -40,6 +45,23 @@ const formSchema = z.object({
 
 
 //const [cookie, setCookie, removeCookie] = useCookies('');
+
+
+const signIn = async (email, password) => {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  })
+
+  if (error) {
+    console.error('Login error:', error.message)
+  } else {
+    console.log('User logged in:', data)
+  }
+}
+
+
+
 
 
 
@@ -70,9 +92,7 @@ export function LoginForm(){
                       <FormControl>
                         <Input placeholder="Username" {...field} />
                       </FormControl>
-                      {/* <FormDescription>
-                        This is your public display name.
-                      </FormDescription> */}
+            
                       <FormMessage />
                     </FormItem>
                   )}
@@ -87,9 +107,6 @@ export function LoginForm(){
       <FormControl>
         <Input placeholder="Password" type="password" {...field} />
       </FormControl>
-      {/* <FormDescription>
-        This is your password
-      </FormDescription> */}
       <FormMessage />
     </FormItem>
   )}
