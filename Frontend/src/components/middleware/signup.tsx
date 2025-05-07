@@ -112,6 +112,9 @@ export function SignupForm() {
     }
   }
   return (
+
+
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
@@ -186,5 +189,6 @@ export function SignupForm() {
         <Button type="submit">Sign Up</Button>
       </form>
     </Form>
+    </div>
   );
 }

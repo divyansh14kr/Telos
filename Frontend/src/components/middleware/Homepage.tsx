@@ -1,6 +1,6 @@
 "use client"
 
-import HeroSectionOne from "../hero-section-demo-1"
+import HeroSectionOne from "../ui/hero-section-demo-1"
 
 export function Homepage(){
    return (
