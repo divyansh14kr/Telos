@@ -3,16 +3,25 @@ import './App.css'
 import { LoginForm } from './components/middleware/login'
 import { SignupForm } from './components/middleware/signup'
 import { Homepage } from './components/middleware/Homepage'
+import TelosValues from './components/middleware/ValueBoard'
+import { BrowserRouter, Route,Routes} from 'react-router-dom'
+
 
 function App() {
 
 
   return (
 
-     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <LoginForm></LoginForm>
+      <BrowserRouter>
+      <Routes>
+        <Route path='/' element={<Homepage/>}/>
+        <Route path='/signup' element={<SignupForm/>}/>
+        <Route path='/login' element ={<LoginForm/>}/>
+        <Route path='home' element={<TelosValues/>}/>
+      </Routes>
+      </BrowserRouter>
 
-    </div>
+
 
   )
 }
