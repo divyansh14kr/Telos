@@ -1,5 +1,3 @@
-
-
 import { createClient } from '@supabase/supabase-js'
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -44,7 +42,7 @@ const formSchema = z.object({
 })
 
 
-//const [cookie, setCookie, removeCookie] = useCookies('');
+
 
 
 const signIn = async (email, password) => {
