@@ -11,7 +11,7 @@ const Navbar = () => {
   const [active, setActive] = useState<string | null>(null);
 
   return (
-    <div className="w-full px-4 py-3 shadow-sm sticky top-0 z-50 bg-white dark:bg-black border-b border-black/10 dark:border-white/10">
+    <div className="w-full px-2 py-1 shadow-sm sticky top-0 z- bg-white dark:bg-black border-b border-black/10 dark:border-white/10">
       <Menu setActive={setActive}>
         <div className="flex justify-between w-full items-center">
           {/* Left-aligned items */}
@@ -22,14 +22,14 @@ const Navbar = () => {
               </div>
             </MenuItem>
             <MenuItem item="Diary/Values" active={active} setActive={setActive}>
-              <div className="flex flex-col space-y-2">
+              <div className="flex flex-col space-y-1">
                 <HoveredLink href="/diary">My Diary</HoveredLink>
                 <HoveredLink href="/home">Core Values</HoveredLink>
               </div>
             </MenuItem>
           </div>
 
-          {/* Right-aligned items */}
+
           <div className="flex space-x-4">
             <MenuItem item="Account" active={active} setActive={setActive}>
               <div className="flex flex-col space-y-2">

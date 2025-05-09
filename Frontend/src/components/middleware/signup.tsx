@@ -14,13 +14,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
-// Initialize Supabase client (use environment variables)
+
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
-// Define the form schema with email included
+
 const formSchema = z
   .object({
     email: z.string().email({ message: 'Invalid email address' }),
@@ -79,7 +79,7 @@ export function SignupForm() {
     },
   });
 
-  // Handle form submission
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const { email, password, username } = values;
   
@@ -93,14 +93,14 @@ export function SignupForm() {
       return;
     }
   
-    console.log('Signup response:', data); // Debug
+    console.log('Signup response:', data); 
     const userId = data.user?.id;
     if (!userId) {
       console.error('No user ID returned from signup');
       return;
     }
   
-    console.log('Inserting profile with userId:', userId); // Debug
+    console.log('Inserting profile with userId:', userId); 
     const { error: profileError } = await supabase
       .from('profiles')
       .insert([{ id: userId, username }]);
@@ -173,12 +173,12 @@ export function SignupForm() {
           )}
         />
 
-        {/* Google OAuth */}
+
         <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
           <GoogleLogin
             onSuccess={(credentialResponse) => {
               console.log('Google login success:', credentialResponse);
-              // Optionally use supabase.auth.signInWithIdToken here
+
             }}
             onError={() => {
               console.error('Google login failed');

@@ -79,7 +79,7 @@ interface TableBlock extends BaseBlock {
 
 type Block = TextBlock | TodoBlock | ImageBlock | CodeBlock | TableBlock;
 
-// Block types and their icons
+
 const BLOCK_TYPES: Record<BlockType, BlockTypeInfo> = {
   TEXT: { label: 'Text', icon: Type },
   TODO: { label: 'To-do', icon: CheckSquare },
@@ -95,7 +95,7 @@ interface SortableItemProps {
   onChange: (id: string, updatedBlock: Block) => void;
 }
 
-// SortableItem component that wraps each block
+
 function SortableItem({ id, block, onRemove, onChange }: SortableItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   
@@ -262,7 +262,7 @@ interface BlockTypeSelectorProps {
   onClose: () => void;
 }
 
-// Block type selector component
+
 function BlockTypeSelector({ onSelect, onClose }: BlockTypeSelectorProps) {
   return (
     <div className="absolute top-full left-0 mt-1 p-2 bg-white rounded-md shadow-lg border border-gray-200 z-10 w-64">
@@ -326,7 +326,7 @@ export default function TelosValues() {
     
     let newBlock: Block;
     
-    // Create specific block types with their required properties
+
     switch (type) {
       case 'TEXT':
         newBlock = { ...newBlockBase, type: 'TEXT', content: '' };
@@ -344,7 +344,7 @@ export default function TelosValues() {
         newBlock = { ...newBlockBase, type: 'TABLE', rows: [['', ''], ['', '']] };
         break;
       default:
-        // This should never happen due to TypeScript, but just in case
+
         newBlock = { ...newBlockBase, type: 'TEXT', content: '' };
     }
     
