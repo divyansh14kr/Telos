@@ -6,6 +6,8 @@ import { Homepage } from './components/middleware/Homepage';
 import TelosValues from './components/middleware/ValueBoard';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Menu, MenuItem, HoveredLink } from './components/ui/navbar-menu';
+import Diary from './components/middleware/Diary'
+import '/Users/divyanshkumar/Documents/code/Telos/Frontend/src/components/middleware/styles.scss'
 
 const Navbar = () => {
   const [active, setActive] = useState<string | null>(null);
@@ -55,7 +57,7 @@ function App() {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/home" element={<TelosValues />} />
         {/* Add this when Diary page exists */}
-        {/* <Route path="/diary" element={<DiaryPage />} /> */}
+        <Route path="/diary" element={<Diary/>} />
       </Routes>
     </BrowserRouter>
   );
