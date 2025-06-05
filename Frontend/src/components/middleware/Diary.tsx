@@ -42,15 +42,6 @@ const MenuBar = () => {
         >
           Strike
         </button>
-        <button
-          onClick={() => editor.chain().focus().toggleCode().run()}
-          disabled={
-            !editor.can().chain().focus().toggleCode().run()
-          }
-          className={editor.isActive('code') ? 'is-active' : ''}
-        >
-          Code
-        </button>
         <button onClick={() => editor.chain().focus().unsetAllMarks().run()}>
           Clear marks
         </button>
@@ -111,12 +102,7 @@ const MenuBar = () => {
         >
           Ordered list
         </button>
-        <button
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          className={editor.isActive('codeBlock') ? 'is-active' : ''}
-        >
-          Code block
-        </button>
+
         <button
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           className={editor.isActive('blockquote') ? 'is-active' : ''}

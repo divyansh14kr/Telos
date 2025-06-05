@@ -1,9 +1,10 @@
-import React, { useState, ReactNode, MouseEvent } from 'react';
+import React, { useState, ReactNode, MouseEvent, useCallback } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { PlusIcon, GripVertical, Trash2, Type, CheckSquare, Image, Code, Table2, LucideIcon } from 'lucide-react';
-
+import { PlusIcon, GripVertical, Trash2, Type, CheckSquare, Image, Table2, LucideIcon } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
+import DateButton from './DateButton';
 
 interface ButtonProps {
   children: ReactNode;
@@ -35,8 +36,7 @@ const IconButton = ({ icon: Icon, onClick, className }: IconButtonProps) => (
   </button>
 );
 
-// Define types for blocks
-type BlockType = 'TEXT' | 'TODO' | 'IMAGE' | 'CODE' | 'TABLE';
+type BlockType = 'TEXT' | 'TODO' | 'IMAGE' | 'TABLE';
 
 interface BlockTypeInfo {
   label: string;
@@ -58,6 +58,7 @@ interface TodoBlock extends BaseBlock {
   type: 'TODO';
   content: string;
   checked: boolean;
+   date?: string;
 }
 
 interface ImageBlock extends BaseBlock {
@@ -66,25 +67,17 @@ interface ImageBlock extends BaseBlock {
   caption?: string;
 }
 
-interface CodeBlock extends BaseBlock {
-  type: 'CODE';
-  content: string;
-  language?: string;
-}
-
 interface TableBlock extends BaseBlock {
   type: 'TABLE';
   rows: string[][];
 }
 
-type Block = TextBlock | TodoBlock | ImageBlock | CodeBlock | TableBlock;
-
+type Block = TextBlock | TodoBlock | ImageBlock | TableBlock;
 
 const BLOCK_TYPES: Record<BlockType, BlockTypeInfo> = {
   TEXT: { label: 'Text', icon: Type },
   TODO: { label: 'To-do', icon: CheckSquare },
   IMAGE: { label: 'Image', icon: Image },
-  CODE: { label: 'Code', icon: Code },
   TABLE: { label: 'Table', icon: Table2 },
 };
 
@@ -94,7 +87,6 @@ interface SortableItemProps {
   onRemove: (id: string) => void;
   onChange: (id: string, updatedBlock: Block) => void;
 }
-
 
 function SortableItem({ id, block, onRemove, onChange }: SortableItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
@@ -113,7 +105,7 @@ function SortableItem({ id, block, onRemove, onChange }: SortableItemProps) {
             value={block.content}
             placeholder="Type something..."
             onChange={(e) => onChange(id, { ...block, content: e.target.value })}
-            rows={Math.max(1, (block.content?.split('\n').length || 0))}
+            rows={Math.max(1, block.content?.split('\n').length || 1)}
           />
         );
       case 'TODO':
@@ -137,7 +129,7 @@ function SortableItem({ id, block, onRemove, onChange }: SortableItemProps) {
         return (
           <div className="flex flex-col gap-2">
             {block.imageUrl ? (
-              <img src={block.imageUrl} alt="User uploaded" className="max-h-64 object-contain" />
+              <img src={block.imageUrl} alt="User uploaded" className="max-h-64 object-contain rounded-md" />
             ) : (
               <div className="h-32 bg-gray-100 flex items-center justify-center rounded-md">
                 <input
@@ -154,26 +146,6 @@ function SortableItem({ id, block, onRemove, onChange }: SortableItemProps) {
               value={block.caption || ''}
               placeholder="Add a caption..."
               onChange={(e) => onChange(id, { ...block, caption: e.target.value })}
-            />
-          </div>
-        );
-      case 'CODE':
-        return (
-          <div className="flex flex-col gap-2">
-            <div className="px-2 py-1 bg-gray-100 text-xs rounded-t-md flex justify-between">
-              <input
-                className="bg-transparent border-none outline-none"
-                value={block.language || ''}
-                placeholder="Language"
-                onChange={(e) => onChange(id, { ...block, language: e.target.value })}
-              />
-            </div>
-            <textarea
-              className="w-full p-2 outline-none resize-none bg-gray-50 font-mono text-sm"
-              value={block.content}
-              placeholder="Enter code..."
-              onChange={(e) => onChange(id, { ...block, content: e.target.value })}
-              rows={Math.max(3, (block.content?.split('\n').length || 0))}
             />
           </div>
         );
@@ -234,7 +206,7 @@ function SortableItem({ id, block, onRemove, onChange }: SortableItemProps) {
     <div 
       ref={setNodeRef} 
       style={style}
-      className="mb-2 group"
+      className="mb-2 group transition-all duration-300 ease-in-out"
     >
       <div className="flex gap-2 p-2 rounded-md border border-transparent hover:border-gray-200 group-hover:bg-gray-50 transition-all">
         <div 
@@ -262,7 +234,6 @@ interface BlockTypeSelectorProps {
   onClose: () => void;
 }
 
-
 function BlockTypeSelector({ onSelect, onClose }: BlockTypeSelectorProps) {
   return (
     <div className="absolute top-full left-0 mt-1 p-2 bg-white rounded-md shadow-lg border border-gray-200 z-10 w-64">
@@ -284,7 +255,6 @@ function BlockTypeSelector({ onSelect, onClose }: BlockTypeSelectorProps) {
   );
 }
 
-
 export default function TelosValues() {
   const [blocks, setBlocks] = useState<Block[]>([
     { id: '1', type: 'TEXT', content: 'Welcome to Telos, please add values you would like to keep track of below' },
@@ -293,76 +263,70 @@ export default function TelosValues() {
   ]);
   
   const [showSelector, setShowSelector] = useState(false);
-  
+
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = useCallback((event: any) => {
     const { active, over } = event;
-    
-    if (active.id !== over.id) {
-      setBlocks((items) => {
-        const oldIndex = items.findIndex(item => item.id === active.id);
-        const newIndex = items.findIndex(item => item.id === over.id);
-        
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  };
+    if (!over || active.id === over.id) return;
 
-  const addBlock = (type: BlockType) => {
-    const newBlockBase = {
-      id: Date.now().toString(),
-      type,
-    };
-    
+    setBlocks((items) => {
+      const oldIndex = items.findIndex(item => item.id === active.id);
+      const newIndex = items.findIndex(item => item.id === over.id);
+      return arrayMove(items, oldIndex, newIndex);
+    });
+  }, []);
+
+  const addBlock = useCallback((type: BlockType) => {
+    const id = uuidv4();
     let newBlock: Block;
-    
 
     switch (type) {
       case 'TEXT':
-        newBlock = { ...newBlockBase, type: 'TEXT', content: '' };
+        newBlock = { id, type: 'TEXT', content: '' };
         break;
       case 'TODO':
-        newBlock = { ...newBlockBase, type: 'TODO', content: '', checked: false };
+        newBlock = { id, type: 'TODO', content: '', checked: false };
         break;
       case 'IMAGE':
-        newBlock = { ...newBlockBase, type: 'IMAGE' };
-        break;
-      case 'CODE':
-        newBlock = { ...newBlockBase, type: 'CODE', content: '' };
+        newBlock = { id, type: 'IMAGE' };
         break;
       case 'TABLE':
-        newBlock = { ...newBlockBase, type: 'TABLE', rows: [['', ''], ['', '']] };
+        newBlock = { id, type: 'TABLE', rows: [['', ''], ['', '']] };
         break;
       default:
-
-        newBlock = { ...newBlockBase, type: 'TEXT', content: '' };
+        newBlock = { id, type: 'TEXT', content: '' };
     }
-    
-    setBlocks([...blocks, newBlock]);
-  };
 
-  const removeBlock = (id: string) => {
-    setBlocks(blocks.filter(block => block.id !== id));
-  };
-  
-  const updateBlock = (id: string, updatedBlock: Block) => {
-    setBlocks(blocks.map(block => block.id === id ? updatedBlock : block));
-  };
+    setBlocks((prev) => [...prev, newBlock]);
+  }, []);
+
+  const removeBlock = useCallback((id: string) => {
+    setBlocks((blocks) => blocks.filter(block => block.id !== id));
+  }, []);
+
+  const updateBlock = useCallback((id: string, updatedBlock: Block) => {
+    setBlocks((blocks) => blocks.map(block => block.id === id ? updatedBlock : block));
+  }, []);
+
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-white min-h-screen">
-      <h1 className="text-4xl font-bold mb-8">Telos</h1>
-      
+      <h1 className="text-4xl font-bold mb-2">Telos</h1>
+
+      {/* Diary Button */}
+      <div className="mb-6">
+        <DateButton 
+          date={new Date()}
+          linkTo={`/diary/${today}`} 
+          className="text-sm text-blue-600 hover:text-blue-800"
+        />
+      </div>
+
       <DndContext 
         sensors={sensors}
         collisionDetection={closestCenter}
